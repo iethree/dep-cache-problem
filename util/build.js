@@ -4,7 +4,7 @@ import fs  from 'fs';
 
 async function doLotsOfWork() {
   // Simulate a time-consuming build process
-  return new Promise((resolve) => setTimeout(resolve, 1000));
+  return new Promise((resolve) => setTimeout(resolve, 10000));
 }
 
 async function generateBuild() {
