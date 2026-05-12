@@ -5,14 +5,16 @@
   "scripts": {
     "test": "vitest",
     "test:ci": "vitest run",
-    "build": "node ./util/build.js",
-    "start": "node ./src/main.js"
+    "build": "node ./scripts/depcli.js build",
+    "start": "node ./src/main.js",
+    "dep:cache": "node ./scripts/depcli.js"
   },
   "type": "module",
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "esbuild": "^0.28.0",
     "vitest": "^4.0.17"
   }
 }

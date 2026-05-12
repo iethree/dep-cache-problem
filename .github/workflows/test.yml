@@ -4,7 +4,41 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - run: npm install
-      - run: npm run build
-      - run: npm run test:ci
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compute dependency hash
+        id: hash
+        run: |
+          echo "hash=$(node scripts/lib/resolve-hash-files.js --hash)" >> $GITHUB_OUTPUT
+
+      - name: Restore cached dependency
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: dist/dep.bin
+          key: dep-bin-${{ steps.hash.outputs.hash }}
+
+      - name: Build dependency
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          npm run build
+          HASH=$(node scripts/lib/resolve-hash-files.js --hash)
+          echo "hash=$HASH"
+          mkdir -p dist
+          echo '{"hash":"'"$HASH"'","builtAt":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' > dist/dep.bin.meta.json
+
+      - name: Upload artifact
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dep-bin-${{ steps.hash.outputs.hash }}
+          path: |
+            dist/dep.bin
+            dist/dep.bin.meta.json
+          retention-days: 7
+
+      - name: Run tests
+        run: npm run test:ci
